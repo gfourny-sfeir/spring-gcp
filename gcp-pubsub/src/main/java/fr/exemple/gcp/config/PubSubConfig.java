@@ -44,12 +44,15 @@ class PubSubConfig {
 
     @Bean
     IntegrationFlow integrationFlow(MessageChannel pubsubInputChannel, ObjectMapper objectMapper) {
+
+        record FileCreated(String name, String bucket){}
+
         return IntegrationFlow.from(pubsubInputChannel)
                 .transform(Transformers.objectToString())
                 .handle(message -> {
                     try {
-                        Map<String, Object> map = objectMapper.readValue(message.getPayload().toString(), Map.class);
-                        log.info("Le fichier {} a été créé sur le bucket {}", map.get("name"), map.get("bucket"));
+                        FileCreated map = objectMapper.readValue(message.getPayload().toString(), FileCreated.class);
+                        log.info("Le fichier {} a été créé sur le bucket {}", map.name, map.bucket);
 
                     } catch (JsonProcessingException e) {
                         throw new RuntimeException(e);

@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: gcp-pubsub
+  cloud:
+    gcp:
+      project-id: emulator
+      pubsub:
+        emulator-host: localhost:38085

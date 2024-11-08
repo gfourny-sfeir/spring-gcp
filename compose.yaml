@@ -1,0 +1,68 @@
+services:
+  storage-commande:
+    image: fsouza/fake-gcs-server:latest
+    command: [ "-scheme", "http", "-event.pubsub-project-id", "emulator", "-event.pubsub-topic", "commande", "-event.bucket", "commande-bucket" ]
+    volumes:
+      - ./storage:/data
+    ports:
+      - "4443:4443"
+    environment:
+      - PUBSUB_EMULATOR_HOST=pubsub-commande:38085
+    depends_on:
+      - pubsub-commande
+    healthcheck:
+      test: echo OK || exit 1
+      start_period: 3s
+      interval: 5s
+      timeout: 10s
+      retries: 3
+
+  pubsub-commande:
+    image: gcr.io/google.com/cloudsdktool/google-cloud-cli:latest
+    container_name: gcp-pubsub-emulator
+    entrypoint: gcloud beta emulators pubsub start --project=emulator --host-port="0.0.0.0:38085"
+    healthcheck:
+      test: curl --output /dev/null --silent --head http://0.0.0.0:38085
+      interval: 5s
+      timeout: 5s
+      retries: 100
+    ports:
+      - "38085:38085"
+    environment:
+      HOST_PORT: 38085
+
+  # Initialise le topic pubsub et la subscription
+  init-pubsub-commande:
+    image: alpine/curl
+    command:
+      - /bin/sh
+      - -c
+      - |
+        curl -X PUT 'http://pubsub-commande:38085/v1/projects/emulator/topics/commande' -H 'Content-Type: application/json' && \
+        curl -X PUT 'http://pubsub-commande:38085/v1/projects/emulator/subscriptions/commande-subscription' -H 'Content-Type: application/json' -d \
+          '{
+              "topic": "projects/emulator/topics/commande"
+           }' && \
+        sleep infinity
+
+    depends_on:
+      pubsub-commande:
+        condition: service_healthy
+    healthcheck:
+      test: curl --fail "http://pubsub-commande:38085/v1/projects/emulator/topics/commande" || exit 1
+      start_period: 0s
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  firestore-commande:
+    image: gcr.io/google.com/cloudsdktool/google-cloud-cli:latest
+    ports:
+      - "8085:8085"
+    entrypoint: gcloud beta emulators firestore start --host-port="0.0.0.0:8085"
+    healthcheck:
+      test: curl --fail "http://localhost:8085/v1/projects/emulator/databases/(default)/documents/" || exit 1
+      start_period: 0s
+      interval: 5s
+      timeout: 5s
+      retries: 12

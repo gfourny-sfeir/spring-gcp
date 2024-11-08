@@ -1,0 +1,11 @@
+spring:
+  application:
+    name: gcp-storage
+  cloud:
+    gcp:
+      project-id: emulator
+app:
+  bucket-name: commande-bucket
+
+server:
+  port: 8081

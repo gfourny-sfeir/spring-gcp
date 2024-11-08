@@ -1,0 +1,9 @@
+### Création d'une commande
+POST http://localhost:8081/api/commande
+Content-Type: application/json
+
+{
+  "id": "{{$random.uuid}}",
+  "nom": "{{$random.alphabetic(10)}}",
+  "prix": {{$random.float(0, 300)}}
+}

@@ -8,4 +8,4 @@ app:
   bucket-name: commande-bucket
 
 server:
-  port: 8081
+  port: 8082

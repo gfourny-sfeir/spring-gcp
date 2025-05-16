@@ -3,7 +3,7 @@ services:
     image: fsouza/fake-gcs-server:latest
     command: [ "-scheme", "http", "-event.pubsub-project-id", "emulator", "-event.pubsub-topic", "commande", "-event.bucket", "commande-bucket" ]
     volumes:
-      - ./storage:/data
+      - ./storage:/storage
     ports:
       - "4443:4443"
     environment:

@@ -1,5 +1,5 @@
 ### Création d'une commande
-POST http://localhost:8081/api/commande
+POST http://localhost:8082/api/commande
 Content-Type: application/json
 
 {
@@ -7,3 +7,6 @@ Content-Type: application/json
   "nom": "{{$random.alphabetic(10)}}",
   "prix": {{$random.float(0, 300)}}
 }
+
+### Récupération des évènements stockés dans Firestore
+GET http://localhost:8085/v1/projects/emulator/databases/(default)/documents/pubsub

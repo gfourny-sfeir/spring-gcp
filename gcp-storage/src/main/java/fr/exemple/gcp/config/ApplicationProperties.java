@@ -6,6 +6,9 @@ import jakarta.validation.constraints.NotBlank;
 
 @ConfigurationProperties(prefix = "app")
 public record ApplicationProperties(
+        /*
+         * Nom du bucket d'écriture
+         */
         @NotBlank String bucketName
 ) {
 }

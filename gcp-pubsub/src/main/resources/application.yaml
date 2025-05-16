@@ -14,3 +14,6 @@ spring:
         database-id: (default)
 server:
   port: 8081
+app:
+  subscription-name: commande-subscription
+  collection-firestore: pubsub

@@ -1,10 +1,5 @@
 package fr.exemple.gcp.config;
 
-import java.util.Map;
-import java.util.Optional;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,24 +7,17 @@ import org.springframework.integration.channel.PublishSubscribeChannel;
 import org.springframework.integration.config.EnableIntegration;
 import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.dsl.Transformers;
-import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.cloud.spring.pubsub.core.PubSubTemplate;
 import com.google.cloud.spring.pubsub.integration.AckMode;
 import com.google.cloud.spring.pubsub.integration.inbound.PubSubInboundChannelAdapter;
-import com.google.cloud.spring.pubsub.support.BasicAcknowledgeablePubsubMessage;
-import com.google.cloud.spring.pubsub.support.GcpPubSubHeaders;
 
-import fr.exemple.gcp.FirestoreWriter;
+import fr.exemple.gcp.MessageHandler;
 
 @EnableIntegration
 @Configuration
 class PubSubConfig {
-
-    private static final Logger log = LoggerFactory.getLogger(PubSubConfig.class);
 
     @Bean
     MessageChannel pubsubInputChannel() {
@@ -39,36 +27,21 @@ class PubSubConfig {
     @Bean
     PubSubInboundChannelAdapter messageChannelAdapter(
             @Qualifier("pubsubInputChannel") MessageChannel inputChannel,
-            PubSubTemplate pubsubTemplate
+            PubSubTemplate pubsubTemplate,
+            ApplicationProperties applicationProperties
     ) {
-        var adapter = new PubSubInboundChannelAdapter(pubsubTemplate, "commande-subscription");
+        var adapter = new PubSubInboundChannelAdapter(pubsubTemplate, applicationProperties.subscriptionName());
         adapter.setOutputChannel(inputChannel);
         adapter.setAckMode(AckMode.MANUAL);
         return adapter;
     }
 
     @Bean
-    IntegrationFlow integrationFlow(MessageChannel pubsubInputChannel, ObjectMapper objectMapper, FirestoreWriter firestoreWriter) {
-
-        record FileCreated(String name, String bucket) {
-        }
+    IntegrationFlow integrationFlow(MessageChannel pubsubInputChannel, MessageHandler messageHandler) {
 
         return IntegrationFlow.from(pubsubInputChannel)
                 .transform(Transformers.objectToString())
-                .handle(message -> {
-                    try {
-                        var map = objectMapper.readValue(message.getPayload().toString(), FileCreated.class);
-                        log.info("Le fichier {} a été créé sur le bucket {}", map.name, map.bucket);
-                        firestoreWriter.save(Map.of("nom", map.name, "bucket", map.bucket));
-                    } catch (JsonProcessingException e) {
-                        throw new RuntimeException(e);
-                    }
-
-                    Optional.of(message)
-                            .map(Message::getHeaders)
-                            .map(messageHeaders -> messageHeaders.get(GcpPubSubHeaders.ORIGINAL_MESSAGE, BasicAcknowledgeablePubsubMessage.class))
-                            .ifPresent(BasicAcknowledgeablePubsubMessage::ack);
-                })
+                .handle(messageHandler::handle)
                 .get();
     }
 }

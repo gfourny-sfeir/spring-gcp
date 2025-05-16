@@ -19,7 +19,7 @@ class CommandeSaver {
     }
 
     void save(Commande commande) {
-        final var blobInfo = BlobInfo.newBuilder(properties.bucketName(), commande.nom()).build();
+        final var blobInfo = BlobInfo.newBuilder(properties.bucketName(), commande.nom() + ".txt").build();
         storage.create(blobInfo, commande.toString().getBytes());
     }
 }

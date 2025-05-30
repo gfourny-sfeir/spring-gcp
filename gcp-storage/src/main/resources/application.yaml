@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: gcp-storage
+  cloud:
+    gcp:
+      project-id: emulator
+  main:
+    allow-bean-definition-overriding: true
+app:
+  bucket-name: commande-bucket
+
+server:
+  port: 8082

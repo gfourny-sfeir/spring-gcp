@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: gcp-pubsub
+  cloud:
+    gcp:
+      project-id: emulator
+      pubsub:
+        emulator-host: localhost:38085
+      firestore:
+        host-port: 127.0.0.1:8085
+        project-id: emulator
+        emulator:
+          enabled: true
+        database-id: (default)
+server:
+  port: 8081
+app:
+  subscription-name: commande-subscription
+  collection-firestore: pubsub

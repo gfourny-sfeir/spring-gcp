@@ -25,6 +25,7 @@
         <java.version>21</java.version>
         <spring-cloud-gcp.version>6.1.1</spring-cloud-gcp.version>
         <spring-cloud.version>2024.0.1</spring-cloud.version>
+        <vavr.version>0.10.6</vavr.version>
     </properties>
     <dependencies>
         <dependency>
@@ -35,6 +36,11 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.vavr</groupId>
+            <artifactId>vavr</artifactId>
+            <version>${vavr.version}</version>
         </dependency>
     </dependencies>
     <dependencyManagement>

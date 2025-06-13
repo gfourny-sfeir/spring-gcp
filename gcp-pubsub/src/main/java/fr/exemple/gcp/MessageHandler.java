@@ -13,20 +13,48 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.cloud.spring.pubsub.support.BasicAcknowledgeablePubsubMessage;
 import com.google.cloud.spring.pubsub.support.GcpPubSubHeaders;
 
+/**
+ * Gestionnaire des messages reçus via Google Cloud Pub/Sub.
+ * Cette classe traite les notifications de création de fichiers dans GCP Storage
+ * et les enregistre dans Firestore.
+ */
 @Component
 public class MessageHandler {
 
+    /**
+     * Logger pour les messages de journalisation.
+     */
     private static final Logger log = LoggerFactory.getLogger(MessageHandler.class);
 
+    /**
+     * Mapper JSON pour désérialiser les messages.
+     */
     private final ObjectMapper objectMapper;
+
+    /**
+     * Service d'écriture dans Firestore.
+     */
     private final FirestoreWriter firestoreWriter;
 
+    /**
+     * Constructeur pour l'injection des dépendances.
+     *
+     * @param objectMapper    Mapper JSON pour la désérialisation des messages
+     * @param firestoreWriter Service pour écrire les données dans Firestore
+     */
     MessageHandler(ObjectMapper objectMapper, FirestoreWriter firestoreWriter) {
         this.objectMapper = objectMapper;
         this.firestoreWriter = firestoreWriter;
     }
 
-    public void handle(Message<?> message){
+    /**
+     * Traite un message reçu de Pub/Sub.
+     * Extrait les informations de création de fichier, les enregistre dans Firestore
+     * et acquitte le message.
+     *
+     * @param message Le message Pub/Sub à traiter
+     */
+    public void handle(Message<?> message) {
         try {
             var map = objectMapper.readValue(message.getPayload().toString(), FileCreated.class);
             log.info("Le fichier {} a été créé sur le bucket {}", map.name, map.bucket);
@@ -41,6 +69,12 @@ public class MessageHandler {
                 .ifPresent(BasicAcknowledgeablePubsubMessage::ack);
     }
 
+    /**
+     * Structure de données représentant un événement de création de fichier.
+     *
+     * @param name   Nom du fichier créé
+     * @param bucket Nom du bucket où le fichier a été créé
+     */
     private record FileCreated(String name, String bucket) {
     }
 }

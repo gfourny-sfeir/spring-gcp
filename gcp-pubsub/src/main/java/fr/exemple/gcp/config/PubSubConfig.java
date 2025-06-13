@@ -15,15 +15,35 @@ import com.google.cloud.spring.pubsub.integration.inbound.PubSubInboundChannelAd
 
 import fr.exemple.gcp.MessageHandler;
 
+/**
+ * Configuration pour l'intégration de Google Cloud Pub/Sub.
+ * Cette classe configure les composants nécessaires pour recevoir et traiter
+ * les messages provenant de Pub/Sub.
+ */
 @EnableIntegration
 @Configuration
 class PubSubConfig {
 
+    /**
+     * Crée un canal de messages pour les messages entrants de Pub/Sub.
+     *
+     * @return Un canal de publication/souscription pour les messages Pub/Sub
+     */
     @Bean
     MessageChannel pubsubInputChannel() {
         return new PublishSubscribeChannel();
     }
 
+    /**
+     * Configure l'adaptateur de canal entrant pour Pub/Sub.
+     * Cet adaptateur reçoit les messages de la souscription Pub/Sub spécifiée
+     * et les envoie au canal d'entrée.
+     *
+     * @param inputChannel          Canal de messages pour recevoir les messages Pub/Sub
+     * @param pubsubTemplate        Template pour interagir avec Pub/Sub
+     * @param applicationProperties Propriétés de configuration de l'application
+     * @return Un adaptateur de canal entrant configuré pour Pub/Sub
+     */
     @Bean
     PubSubInboundChannelAdapter messageChannelAdapter(
             @Qualifier("pubsubInputChannel") MessageChannel inputChannel,
@@ -36,6 +56,14 @@ class PubSubConfig {
         return adapter;
     }
 
+    /**
+     * Configure le flux d'intégration pour traiter les messages Pub/Sub.
+     * Ce flux transforme les messages reçus et les transmet au gestionnaire de messages.
+     *
+     * @param pubsubInputChannel Canal d'entrée pour les messages Pub/Sub
+     * @param messageHandler     Gestionnaire qui traite les messages
+     * @return Un flux d'intégration configuré
+     */
     @Bean
     IntegrationFlow integrationFlow(MessageChannel pubsubInputChannel, MessageHandler messageHandler) {
 

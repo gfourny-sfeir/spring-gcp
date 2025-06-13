@@ -20,8 +20,8 @@ class CommandeSaver {
 
     /**
      * Constructeur du service CommandeSaver.
-     * 
-     * @param storage l'instance de Storage pour accéder à Google Cloud Storage
+     *
+     * @param storage    l'instance de Storage pour accéder à Google Cloud Storage
      * @param properties les propriétés de l'application contenant la configuration du bucket
      */
     CommandeSaver(Storage storage, ApplicationProperties properties) {
@@ -32,7 +32,7 @@ class CommandeSaver {
     /**
      * Sauvegarde une commande dans Google Cloud Storage.
      * La commande est enregistrée sous forme de fichier texte avec le nom de la commande comme nom de fichier.
-     * 
+     *
      * @param commande {@link Commande} la commande à sauvegarder
      */
     void save(Commande commande) {
